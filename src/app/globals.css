@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@plugin "daisyui" {
+  themes: shofi --default;
 }
 
+/* Shofi Traders — Borrow Ledger theme
+  Crisp paper-white surfaces, deep teal, and restrained geometry. */
+@plugin "daisyui/theme" {
+  name: "shofi";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #f8faf9;
+  /* paper-white background */
+  --color-base-200: #eef3f0;
+  /* muted section background */
+  --color-base-300: #d9e2dd;
+  /* borders / dividers */
+  --color-base-content: #202a26;
+  /* charcoal text */
+
+  --color-primary: #155e52;
+  /* deep teal */
+  --color-primary-content: #f8faf9;
+
+  --color-secondary: #50665e;
+  /* muted green-gray */
+  --color-secondary-content: #f8faf9;
+
+  --color-accent: #b47724;
+  /* restrained brass */
+  --color-accent-content: #202a26;
+
+  --color-neutral: #202a26;
+  --color-neutral-content: #f8faf9;
+
+  --color-info: #2f6b8a;
+  --color-info-content: #faf7f2;
+  --color-success: #18724e;
+  /* payment/positive green */
+  --color-success-content: #faf7f2;
+  --color-warning: #b86b1a;
+  /* warm orange */
+  --color-warning-content: #faf7f2;
+  --color-error: #b3301f;
+  /* deep red for destructive */
+  --color-error-content: #faf7f2;
+
+  --radius-selector: 0.25rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* App-level tokens */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-noto-bengali);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --color-canvas: #f8faf9;
+  --color-ink: #202a26;
+  --color-ink-soft: #53615b;
+  --color-rule: #d9e2dd;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html,
+body {
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  font-family: var(--font-noto-bengali), "Noto Sans Bengali", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c8d4ce;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aebfb6;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #155e52;
+  outline-offset: 2px;
+}
+
+/* Tiny utility for ledger card hairline */
+.ledger-card {
+  background-color: var(--color-base-100, #ffffff);
+  border: 1px solid var(--color-base-300, #e7e0d2);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(32, 42, 38, 0.04);
+}
+
+.ledger-card.ledger-card-prominent {
+  background-color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary-content);
+}
+
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes modalPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-backdrop-in {
+  animation: modalBackdropIn 180ms ease-out;
+}
+
+.modal-panel-in {
+  animation: modalPanelIn 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }

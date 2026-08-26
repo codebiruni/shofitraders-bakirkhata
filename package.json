@@ -1,5 +1,5 @@
 {
-  "name": "shofi-ledger-scaffold",
+  "name": "shofi-traders-borrow-ledger",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,24 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.23",
+    "mongodb": "^7.6.0",
     "next": "16.3.2",
+    "next-auth": "^4.24.15",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "react-hot-toast": "^2.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "daisyui": "^5.7.22",
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
     "tailwindcss": "^4",
