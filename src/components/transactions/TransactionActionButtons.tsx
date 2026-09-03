@@ -76,7 +76,7 @@ function BorrowingDialog({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const today = dayjs().format("YYYY-MM-DD");
+  const today = dayjs().format("YYYY-MM-DDTHH:mm");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -111,10 +111,10 @@ function BorrowingDialog({
             className="input input-bordered w-full rounded-md pl-7"
           />
         </Field>
-        <Field label="তারিখ">
+        <Field label="তারিখ ও সময়">
           <input
             name="date"
-            type="date"
+            type="datetime-local"
             defaultValue={today}
             max={today}
             required
@@ -152,7 +152,7 @@ function PaymentDialog({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
-  const today = dayjs().format("YYYY-MM-DD");
+  const today = dayjs().format("YYYY-MM-DDTHH:mm");
 
   const numericAmount = Number(amount.replace(/[,\s৳]/g, "")) || 0;
   const exceeds = numericAmount - outstanding > 0.0001 && outstanding > 0;
@@ -199,10 +199,10 @@ function PaymentDialog({
             চেয়ে বেশি হয়ে যাচ্ছে।
           </p>
         )}
-        <Field label="তারিখ">
+        <Field label="তারিখ ও সময়">
           <input
             name="date"
-            type="date"
+            type="datetime-local"
             defaultValue={today}
             max={today}
             required

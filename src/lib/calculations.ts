@@ -50,6 +50,16 @@ export function formatDate(date: Date | string | null | undefined): string {
 }
 
 /**
+ * Format a date with time like "25 Aug 2026, 3:45 PM".
+ */
+export function formatDateTime(date: Date | string | null | undefined): string {
+  if (!date) return "—";
+  const d = dayjs(date);
+  if (!d.isValid()) return "—";
+  return d.format("DD MMM YYYY, h:mm A");
+}
+
+/**
  * Format a date for input[type=date] (YYYY-MM-DD).
  */
 export function toDateInputValue(date: Date | string | null | undefined): string {

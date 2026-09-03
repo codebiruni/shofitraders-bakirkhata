@@ -21,6 +21,7 @@ export interface Transaction {
   date: Date;
   paymentMethod?: PaymentMethod | null;
   note?: string;
+  receiptNo?: string;
   createdAt: Date;
 }
 
@@ -39,3 +40,53 @@ export interface TransactionWithBorrower extends Transaction {
 export type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string };
+
+export type PricingType = "weight" | "pcs";
+
+export interface InvoiceItem {
+  sr: number;
+  name: string;
+  bundle?: number;
+  pcs?: number;
+  weight?: number;
+  pricingType: PricingType;
+  rate?: number;
+  discount?: number;
+  amount?: number;
+}
+
+export interface Invoice {
+  _id: string;
+  invoiceNo: string;
+  date: Date;
+  /** Time of the invoice/delivery in 24h "HH:mm" format. */
+  time?: string;
+  customerName: string;
+  customerPhone?: string;
+  billToAddress?: string;
+  deliverySiteContact?: string;
+  deliveryAddress?: string;
+  deliveryFrom?: string;
+  items: InvoiceItem[];
+  subTotal?: number;
+  previousDue?: number;
+  currentPayment?: number;
+  remainingTotal?: number;
+  quantityInWords?: string;
+  deliveryNote?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Shape of an invoice as returned by the JSON API (dates serialized to ISO
+ * strings). Used on the client to pre-fill the form when editing an invoice.
+ */
+export type EditableInvoice = Omit<
+  Invoice,
+  "date" | "createdAt" | "updatedAt"
+> & {
+  date: string;
+  createdAt?: string;
+  updatedAt?: string;
+};

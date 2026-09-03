@@ -59,3 +59,5 @@ export function MobileNav() {
     </>
   );
 }
+
+// curl "http://api.sonalisms.com:7788/sendtext?apikey=20b34eeef4440e25&secretkey=801010a1&callerID=01764047140&toUser=8801311392727&messageContent=Test+message+from+Shofi+Traders"

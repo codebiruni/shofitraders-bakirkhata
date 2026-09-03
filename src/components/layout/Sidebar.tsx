@@ -6,6 +6,7 @@ const NAV = [
   { href: "/", label: "ড্যাশবোর্ড", iconKey: "dashboard", exact: true },
   { href: "/borrowers", label: "কাস্টমার", iconKey: "borrowers" },
   { href: "/transactions", label: "হিসাব", iconKey: "transactions" },
+  { href: "/invoices", label: "Invoices", iconKey: "invoices" },
 ] as const;
 
 export function Sidebar() {
@@ -50,7 +51,7 @@ export function Sidebar() {
   );
 }
 
-function NavIcon({ name }: { name: "dashboard" | "borrowers" | "transactions" }) {
+function NavIcon({ name }: { name: "dashboard" | "borrowers" | "transactions" | "invoices" }) {
   if (name === "dashboard") {
     return (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -66,6 +67,14 @@ function NavIcon({ name }: { name: "dashboard" | "borrowers" | "transactions" })
         <path d="M2.5 20a6.5 6.5 0 0113 0" />
         <circle cx="17" cy="9" r="2.5" />
         <path d="M15 20a5 5 0 017-4.6" />
+      </svg>
+    );
+  }
+  if (name === "invoices") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M5 3h14v18H5z" />
+        <path d="M9 7h6M9 11h6M9 15h4" />
       </svg>
     );
   }

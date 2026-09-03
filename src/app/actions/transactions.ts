@@ -9,6 +9,9 @@ import {
   paymentInputSchema,
 } from "@/lib/validators";
 import { summarizeTransactions } from "@/lib/calculations";
+import { formatBDT } from "@/lib/format";
+import { findBorrowerById } from "@/lib/queries";
+import { sendSms } from "@/lib/sms";
 import type { ActionResult, Transaction } from "@/lib/types";
 
 const TRANSACTIONS = "transactions";
@@ -46,6 +49,38 @@ function normalizeOptional(raw: FormDataEntryValue | null): string | undefined {
   return v.length === 0 ? undefined : v;
 }
 
+async function generateReceiptNo(db: Awaited<ReturnType<typeof getDb>>): Promise<string> {
+  const last = await db
+    .collection<Transaction>(TRANSACTIONS)
+    .find({ receiptNo: { $exists: true } })
+    .sort({ receiptNo: -1 })
+    .limit(1)
+    .toArray();
+  const lastNo = last.length > 0 ? parseInt(last[0].receiptNo!.replace(/\D/g, ""), 10) || 0 : 0;
+  const next = lastNo + 1;
+  return `RCP-${String(next).padStart(4, "0")}`;
+}
+
+/**
+ * Fire-and-forget SMS notification. Never blocks or fails the transaction
+ * if the borrower has no phone or the SMS provider errors.
+ */
+async function notifyTransactionBySms(
+  borrowerId: string,
+  type: "borrowed" | "payment",
+  amount: number
+): Promise<void> {
+  try {
+    const borrower = await findBorrowerById(borrowerId);
+    if (!borrower?.phone) return;
+    const label = type === "borrowed" ? "নতুন ঋণ" : "পেমেন্ট";
+    const message = `SHOFI TRADERS: টেস্ট মেসেজ — ${borrower.name} এর ${label} ${formatBDT(amount)} রেকর্ড হয়েছে।`;
+    await sendSms(borrower.phone, message);
+  } catch (err) {
+    console.error("[sms] notify failed", err);
+  }
+}
+
 export async function addBorrowing(formData: FormData): Promise<ActionResult<{ id: string }>> {
   const raw = {
     borrowerId: formData.get("borrowerId")?.toString() ?? "",
@@ -57,6 +92,8 @@ export async function addBorrowing(formData: FormData): Promise<ActionResult<{ i
   if (!parsed.success) return bad(parsed.error.issues[0]?.message ?? "Invalid input");
 
   const id = toTxId();
+  const db = await getDb();
+  const receiptNo = await generateReceiptNo(db);
   const doc: Transaction = {
     _id: id,
     borrowerId: parsed.data.borrowerId,
@@ -65,16 +102,18 @@ export async function addBorrowing(formData: FormData): Promise<ActionResult<{ i
     date: parsed.data.date,
     paymentMethod: null,
     note: parsed.data.note,
+    receiptNo,
     createdAt: new Date(),
   };
 
   try {
-    const db = await getDb();
     await db.collection<Transaction>(TRANSACTIONS).insertOne(doc);
   } catch (err) {
     console.error("[addBorrowing] failed", err);
     return bad("Something went wrong. Please try again.");
   }
+
+  void notifyTransactionBySms(parsed.data.borrowerId, "borrowed", parsed.data.amount);
 
   revalidatePath("/");
   revalidatePath("/borrowers");
@@ -98,9 +137,10 @@ export async function recordPayment(formData: FormData): Promise<ActionResult<{ 
   const parsed = paymentInputSchema.safeParse(raw);
   if (!parsed.success) return bad(parsed.error.issues[0]?.message ?? "Invalid input");
 
+  const db = await getDb();
+
   // Validate against current outstanding (computed, never stored)
   try {
-    const db = await getDb();
     const txs = await db
       .collection<Transaction>(TRANSACTIONS)
       .find({ borrowerId: idCheck.data })
@@ -115,6 +155,7 @@ export async function recordPayment(formData: FormData): Promise<ActionResult<{ 
   }
 
   const id = toTxId();
+  const receiptNo = await generateReceiptNo(db);
   const doc: Transaction = {
     _id: id,
     borrowerId: parsed.data.borrowerId,
@@ -123,16 +164,18 @@ export async function recordPayment(formData: FormData): Promise<ActionResult<{ 
     date: parsed.data.date,
     paymentMethod: parsed.data.paymentMethod,
     note: parsed.data.note,
+    receiptNo,
     createdAt: new Date(),
   };
 
   try {
-    const db = await getDb();
     await db.collection<Transaction>(TRANSACTIONS).insertOne(doc);
   } catch (err) {
     console.error("[recordPayment] insert failed", err);
     return bad("Something went wrong. Please try again.");
   }
+
+  void notifyTransactionBySms(parsed.data.borrowerId, "payment", parsed.data.amount);
 
   revalidatePath("/");
   revalidatePath("/borrowers");

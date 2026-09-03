@@ -94,7 +94,11 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
 
       <TransactionHistory
         borrowerId={borrower._id}
+        borrowerName={borrower.name}
+        borrowerPhone={borrower.phone}
+        borrowerAddress={borrower.address}
         transactions={transactions}
+        summary={summary}
       />
 
       <p className="text-center text-xs text-ink-soft">

@@ -2,11 +2,12 @@ import Link from "next/link";
 import { ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { getDb } from "@/lib/mongodb";
 import { ensureIndexes } from "@/lib/queries";
-import { formatDate } from "@/lib/calculations";
+import { formatDateTime } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Borrower, Transaction, TransactionWithBorrower } from "@/lib/types";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
+import { TransactionRowReceiptButton } from "@/components/transactions/TransactionRowReceiptButton";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ async function loadTransactions(filters: {
     }
     if (filters.from || filters.to) {
       const date: Record<string, Date> = {};
-      if (filters.from) date.$gte = new Date(`${filters.from}T00:00:00`);
+      if (filters.from) date.$gte = new Date(`${filters.from}T00:00:00.000`);
       if (filters.to) date.$lte = new Date(`${filters.to}T23:59:59.999`);
       query.date = date;
     }
@@ -129,6 +130,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                     <th className="text-right font-medium">টাকা</th>
                     <th className="font-medium">মাধ্যম</th>
                     <th className="font-medium">নোট</th>
+                    <th className="text-right font-medium">রসিদ</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -139,7 +141,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                         }`}
                     >
                       <td className="whitespace-nowrap text-sm text-ink">
-                        {formatDate(t.date)}
+                        {formatDateTime(t.date)}
                       </td>
                       <td>
                         <Link
@@ -168,6 +170,9 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                       </td>
                       <td className="max-w-[18rem] truncate text-sm text-ink-soft">
                         {t.note || "—"}
+                      </td>
+                      <td className="text-right">
+                        <TransactionRowReceiptButton transaction={t} />
                       </td>
                     </tr>
                   ))}
@@ -202,7 +207,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                     {formatBDT(t.amount)}
                   </p>
                   <p className="mt-0.5 text-xs text-ink-soft">
-                    {formatDate(t.date)}
+                    {formatDateTime(t.date)}
                     {t.paymentMethod
                       ? ` · ${paymentMethodLabel(t.paymentMethod)}`
                       : ""}
@@ -212,6 +217,9 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                       {t.note}
                     </p>
                   )}
+                  <div className="mt-2 flex justify-end">
+                    <TransactionRowReceiptButton transaction={t} />
+                  </div>
                 </li>
               );
             })}

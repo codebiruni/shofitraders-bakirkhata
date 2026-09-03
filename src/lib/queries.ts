@@ -3,6 +3,7 @@ import type { Borrower, Transaction } from "./types";
 
 const BORROWERS = "borrowers";
 const TRANSACTIONS = "transactions";
+const INVOICES = "invoices";
 
 /**
  * Ensure required indexes exist. Idempotent — safe to call on every request,
@@ -14,6 +15,9 @@ export async function ensureIndexes(): Promise<void> {
   await db.collection(BORROWERS).createIndex({ phone: 1 });
   await db.collection(TRANSACTIONS).createIndex({ borrowerId: 1 });
   await db.collection(TRANSACTIONS).createIndex({ date: -1 });
+  await db.collection(INVOICES).createIndex({ invoiceNo: 1 });
+  await db.collection(INVOICES).createIndex({ date: -1 });
+  await db.collection(INVOICES).createIndex({ customerName: 1 });
 }
 
 // Borrower helpers
