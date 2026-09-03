@@ -9,8 +9,9 @@ import { deleteTransaction } from "@/app/actions/transactions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ReceiptModal } from "@/components/transactions/ReceiptModal";
 import { formatDate, formatDateTime } from "@/lib/calculations";
+import type { BorrowerSummary } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
-import type { Transaction, BorrowerSummary } from "@/lib/types";
+import type { Transaction } from "@/lib/types";
 
 interface Props {
   borrowerId: string;

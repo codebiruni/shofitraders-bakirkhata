@@ -4,8 +4,9 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Printer } from "@phosphor-icons/react";
 import { formatDateTime } from "@/lib/calculations";
+import type { BorrowerSummary } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
-import type { Transaction, BorrowerSummary } from "@/lib/types";
+import type { Transaction } from "@/lib/types";
 
 interface ReceiptModalProps {
     open: boolean;
