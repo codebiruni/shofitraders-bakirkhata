@@ -62,8 +62,9 @@ async function generateReceiptNo(db: Awaited<ReturnType<typeof getDb>>): Promise
 }
 
 /**
- * Fire-and-forget SMS notification. Never blocks or fails the transaction
- * if the borrower has no phone or the SMS provider errors.
+ * Fire-and-forget SMS notification. Never blocks or fails the transaction if
+ * the borrower has no phone or the SMS provider errors, but every outcome is
+ * logged so a missing message can actually be diagnosed.
  */
 async function notifyTransactionBySms(
   borrowerId: string,
@@ -72,10 +73,24 @@ async function notifyTransactionBySms(
 ): Promise<void> {
   try {
     const borrower = await findBorrowerById(borrowerId);
-    if (!borrower?.phone) return;
+    if (!borrower) {
+      console.warn(`[sms] borrower ${borrowerId} not found — notification skipped`);
+      return;
+    }
+    if (!borrower.phone?.trim()) {
+      console.warn(
+        `[sms] borrower ${borrower.name} has no phone number — notification skipped`
+      );
+      return;
+    }
     const label = type === "borrowed" ? "নতুন ঋণ" : "পেমেন্ট";
     const message = `SHOFI TRADERS: টেস্ট মেসেজ — ${borrower.name} এর ${label} ${formatBDT(amount)} রেকর্ড হয়েছে।`;
-    await sendSms(borrower.phone, message);
+    const result = await sendSms(borrower.phone, message);
+    if (!result.ok) {
+      console.error(
+        `[sms] notification for ${borrower.name} (${borrower.phone}) not delivered: ${result.error ?? "unknown error"}`
+      );
+    }
   } catch (err) {
     console.error("[sms] notify failed", err);
   }

@@ -76,6 +76,14 @@ export const paymentInputSchema = z.object({
 export type BorrowingInput = z.infer<typeof borrowingInputSchema>;
 export type PaymentInput = z.infer<typeof paymentInputSchema>;
 
+// ---- Bulk message ----
+
+export const bulkMessageSchema = z.object({
+  message: trimmedString(1000, "Message").min(1, "Message is required"),
+});
+
+export type BulkMessageInput = z.infer<typeof bulkMessageSchema>;
+
 // ---- ID ----
 export const objectIdSchema = z
   .string()

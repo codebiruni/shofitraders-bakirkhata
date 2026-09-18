@@ -27,6 +27,27 @@ export async function findBorrowerById(id: string): Promise<Borrower | null> {
   return doc ?? null;
 }
 
+/**
+ * Every customer in the ledger, sorted by name for stable display.
+ */
+export async function findAllBorrowers(): Promise<Borrower[]> {
+  const db = await getDb();
+  return db.collection<Borrower>(BORROWERS).find({}).sort({ name: 1 }).toArray();
+}
+
+/**
+ * All customers that can receive an SMS, i.e. every borrower whose phone
+ * number is a real value (not missing, not blank). Sorted by name.
+ */
+export async function findBorrowersWithPhone(): Promise<Borrower[]> {
+  const db = await getDb();
+  return db
+    .collection<Borrower>(BORROWERS)
+    .find({ phone: { $type: "string", $regex: /\S/ } })
+    .sort({ name: 1 })
+    .toArray();
+}
+
 export async function findTransactionsByBorrower(
   borrowerId: string
 ): Promise<Transaction[]> {

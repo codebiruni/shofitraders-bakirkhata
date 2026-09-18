@@ -6,6 +6,7 @@ import {
   House,
   Users,
   Receipt,
+  ChatTeardropText,
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/cn";
 import { LogoutButton } from "@/components/auth/LogoutButton";
@@ -14,6 +15,7 @@ const NAV = [
   { href: "/", label: "ড্যাশবোর্ড", icon: House },
   { href: "/borrowers", label: "কাস্টমার", icon: Users },
   { href: "/transactions", label: "হিসাব", icon: Receipt },
+  { href: "/messages", label: "মেসেজ", icon: ChatTeardropText },
 ] as const;
 
 export function MobileNav() {
@@ -33,7 +35,7 @@ export function MobileNav() {
       </header>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-base-300 bg-base-100/95 backdrop-blur md:hidden">
-        <ul className="mx-auto grid w-full max-w-md grid-cols-3 px-2 pb-[max(env(safe-area-inset-bottom),0.4rem)] pt-1.5">
+        <ul className="mx-auto grid w-full max-w-md grid-cols-4 px-2 pb-[max(env(safe-area-inset-bottom),0.4rem)] pt-1.5">
           {NAV.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
@@ -60,4 +62,4 @@ export function MobileNav() {
   );
 }
 
-// curl "http://api.sonalisms.com:7788/sendtext?apikey=20b34eeef4440e25&secretkey=801010a1&callerID=01764047140&toUser=8801311392727&messageContent=Test+message+from+Shofi+Traders"
+// curl "http://103.177.125.106:7788/sendtext?apikey=20b34eeef4440e25&secretkey=801010a1&callerID=Shofi+Trade&toUser=8801311392727&messageContent=Test+message+from+Shofi+Traders"
