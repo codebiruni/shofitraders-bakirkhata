@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Printer } from "@phosphor-icons/react";
 import { formatDateTime } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
+import { paymentMethodLabel } from "@/lib/payment-methods";
 import type { Transaction } from "@/lib/types";
 
 interface ReceiptModalProps {
@@ -14,6 +15,7 @@ interface ReceiptModalProps {
     borrowerName: string;
     borrowerPhone?: string;
     borrowerAddress?: string;
+    outstanding?: number;
 }
 
 export function ReceiptModal({
@@ -23,6 +25,7 @@ export function ReceiptModal({
     borrowerName,
     borrowerPhone,
     borrowerAddress,
+    outstanding,
 }: ReceiptModalProps) {
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -126,7 +129,7 @@ export function ReceiptModal({
                 {transaction.paymentMethod && (
                     <p style={{ fontSize: "12px", color: "#6b7280", margin: "0.5rem 0 0" }}>
                         মাধ্যম: <span style={{ color: "#1f2937", fontWeight: 500 }}>
-                            {transaction.paymentMethod === "cash" ? "নগদ" : transaction.paymentMethod === "bank" ? "ব্যাংক" : "অনযানয"}
+                            {paymentMethodLabel(transaction.paymentMethod)}
                         </span>
                     </p>
                 )}
@@ -136,6 +139,20 @@ export function ReceiptModal({
                     </p>
                 )}
             </div>
+
+            {typeof outstanding === "number" && (
+                <div style={{ backgroundColor: "#f9fafb", borderRadius: "0.5rem", padding: "0.75rem", marginBottom: "1rem" }}>
+                    <p style={{ fontSize: "10px", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 0.25rem" }}>
+                        মোট হিসাব
+                    </p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "12px", color: "#6b7280" }}>মোট পাওয়া</span>
+                        <span style={{ fontSize: "12px", fontWeight: 700, color: "#1f2937", fontVariantNumeric: "tabular-nums" }}>
+                            {formatBDT(outstanding)}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             <div style={{ marginTop: "2rem", paddingTop: "1rem", borderTop: "1px dashed #d1d5db" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>

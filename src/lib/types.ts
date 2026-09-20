@@ -11,7 +11,7 @@ export interface Borrower {
 }
 
 export type TransactionType = "borrowed" | "payment";
-export type PaymentMethod = "cash" | "bank" | "other";
+export type PaymentMethod = "cash" | "bkash" | "nagad" | "bank" | "other";
 
 export interface Transaction {
   _id: string;
@@ -35,6 +35,7 @@ export interface BorrowerWithStats extends Borrower {
 
 export interface TransactionWithBorrower extends Transaction {
   borrowerName: string;
+  outstanding?: number;
 }
 
 export type ActionResult<T> =

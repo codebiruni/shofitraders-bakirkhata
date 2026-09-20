@@ -8,19 +8,20 @@ import toast from "react-hot-toast";
 import { deleteTransaction } from "@/app/actions/transactions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ReceiptModal } from "@/components/transactions/ReceiptModal";
-import { formatDate, formatDateTime } from "@/lib/calculations";
+import { formatDateTime, summarizeTransactions } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
+import { paymentMethodLabel } from "@/lib/payment-methods";
 import type { Transaction } from "@/lib/types";
 
 interface Props {
-  borrowerId: string;
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
   transactions: Transaction[];
 }
 
-export function TransactionHistory({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
+export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
+  const summary = summarizeTransactions(transactions);
   return (
     <div className="ledger-card overflow-hidden">
       <div className="flex items-center justify-between border-b border-base-300 px-4 py-3 sm:px-5">
@@ -31,27 +32,31 @@ export function TransactionHistory({ borrowerId, borrowerName, borrowerPhone, bo
       </div>
       <div className="hidden md:block">
         <DesktopTable
-          borrowerId={borrowerId}
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
           transactions={transactions}
+          outstanding={summary.outstanding}
         />
       </div>
       <div className="md:hidden">
         <MobileList
-          borrowerId={borrowerId}
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
           transactions={transactions}
+          outstanding={summary.outstanding}
         />
       </div>
     </div>
   );
 }
 
-function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
+interface TableProps extends Props {
+  outstanding: number;
+}
+
+function DesktopTable({ borrowerName, borrowerPhone, borrowerAddress, transactions, outstanding }: TableProps) {
   if (transactions.length === 0) {
     return (
       <div className="px-6 py-10 text-center">
@@ -79,11 +84,11 @@ function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress
           {transactions.map((tx) => (
             <TransactionRow
               key={tx._id}
-              borrowerId={borrowerId}
               borrowerName={borrowerName}
               borrowerPhone={borrowerPhone}
               borrowerAddress={borrowerAddress}
               tx={tx}
+              outstanding={outstanding}
             />
           ))}
         </tbody>
@@ -92,7 +97,7 @@ function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress
   );
 }
 
-function MobileList({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
+function MobileList({ borrowerName, borrowerPhone, borrowerAddress, transactions, outstanding }: TableProps) {
   if (transactions.length === 0) {
     return (
       <div className="px-6 py-10 text-center">
@@ -108,11 +113,11 @@ function MobileList({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, 
       {transactions.map((tx) => (
         <MobileRow
           key={tx._id}
-          borrowerId={borrowerId}
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
           tx={tx}
+          outstanding={outstanding}
         />
       ))}
     </ul>
@@ -120,17 +125,17 @@ function MobileList({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, 
 }
 
 function TransactionRow({
-  borrowerId,
   borrowerName,
   borrowerPhone,
   borrowerAddress,
+  outstanding,
   tx,
 }: {
-  borrowerId: string;
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
   tx: Transaction;
+  outstanding: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -197,23 +202,24 @@ function TransactionRow({
         borrowerName={borrowerName}
         borrowerPhone={borrowerPhone}
         borrowerAddress={borrowerAddress}
+        outstanding={outstanding}
       />
     </>
   );
 }
 
 function MobileRow({
-  borrowerId,
   borrowerName,
   borrowerPhone,
   borrowerAddress,
+  outstanding,
   tx,
 }: {
-  borrowerId: string;
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
   tx: Transaction;
+  outstanding: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -279,6 +285,7 @@ function MobileRow({
         borrowerName={borrowerName}
         borrowerPhone={borrowerPhone}
         borrowerAddress={borrowerAddress}
+        outstanding={outstanding}
       />
     </>
   );
@@ -299,11 +306,6 @@ function TypeBadge({ type }: { type: "borrowed" | "payment" }) {
   );
 }
 
-function paymentMethodLabel(method: "cash" | "bank" | "other") {
-  if (method === "cash") return "নগদ";
-  if (method === "bank") return "ব্যাংক";
-  return "অন্যান্য";
-}
 
 function DeleteTxDialog({
   open,

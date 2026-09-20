@@ -77,7 +77,6 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
       </header>
 
       <TransactionHistory
-        borrowerId={borrower._id}
         borrowerName={borrower.name}
         borrowerPhone={borrower.phone}
         borrowerAddress={borrower.address}

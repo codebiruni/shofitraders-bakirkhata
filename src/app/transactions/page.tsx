@@ -4,6 +4,7 @@ import { getDb } from "@/lib/mongodb";
 import { ensureIndexes } from "@/lib/queries";
 import { formatDateTime } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
+import { paymentMethodLabel } from "@/lib/payment-methods";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Borrower, Transaction, TransactionWithBorrower } from "@/lib/types";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
@@ -63,10 +64,38 @@ async function loadTransactions(filters: {
       .find({ _id: { $in: ids } })
       .toArray();
     const byId = new Map(borrowers.map((b) => [b._id, b]));
-    return txs.map((t) => ({
-      ...t,
-      borrowerName: byId.get(t.borrowerId)?.name ?? "Unknown",
-    }));
+
+    // Per-borrower totals across their full history (independent of the
+    // current filter) so receipts can show মোট ঋণ / মোট বাকি.
+    const totalsByBorrower = await db
+      .collection<Transaction>("transactions")
+      .aggregate<{ _id: string; totalBorrowed: number; totalPaid: number }>([
+        { $match: { borrowerId: { $in: ids } } },
+        {
+          $group: {
+            _id: "$borrowerId",
+            totalBorrowed: {
+              $sum: { $cond: [{ $eq: ["$type", "borrowed"] }, "$amount", 0] },
+            },
+            totalPaid: {
+              $sum: { $cond: [{ $eq: ["$type", "payment"] }, "$amount", 0] },
+            },
+          },
+        },
+      ])
+      .toArray();
+    const totalsById = new Map(totalsByBorrower.map((t) => [t._id, t]));
+
+    return txs.map((t) => {
+      const totals = totalsById.get(t.borrowerId);
+      const totalBorrowed = totals?.totalBorrowed ?? 0;
+      const totalPaid = totals?.totalPaid ?? 0;
+      return {
+        ...t,
+        borrowerName: byId.get(t.borrowerId)?.name ?? "Unknown",
+        outstanding: Math.max(0, totalBorrowed - totalPaid),
+      };
+    });
   } catch (err) {
     console.error("[transactions page] load failed", err);
     return [];
@@ -247,10 +276,4 @@ function TypeBadge({ type }: { type: "borrowed" | "payment" }) {
       {isBorrowed ? "বাকি নিয়েছে" : "টাকা জমা"}
     </span>
   );
-}
-
-function paymentMethodLabel(method: "cash" | "bank" | "other") {
-  if (method === "cash") return "নগদ";
-  if (method === "bank") return "ব্যাংক";
-  return "অন্যান্য";
 }

@@ -216,7 +216,9 @@ function PaymentDialog({
             defaultValue="cash"
             className="select select-bordered w-full rounded-md"
           >
-            <option value="cash">নগদ</option>
+            <option value="cash">ক্যাশ</option>
+            <option value="bkash">বিকাশ</option>
+            <option value="nagad">নগদ</option>
             <option value="bank">ব্যাংক</option>
             <option value="other">অন্যান্য</option>
           </select>

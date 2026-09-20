@@ -62,7 +62,7 @@ export const paymentInputSchema = z.object({
   borrowerId: z.string().min(1, "Borrower is required"),
   amount: amountSchema,
   date: dateSchema,
-  paymentMethod: z.enum(["cash", "bank", "other"], {
+  paymentMethod: z.enum(["cash", "bkash", "nagad", "bank", "other"], {
     message: "Choose a payment method",
   }),
   note: z

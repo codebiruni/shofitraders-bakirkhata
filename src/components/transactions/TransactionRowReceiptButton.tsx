@@ -27,6 +27,7 @@ export function TransactionRowReceiptButton({ transaction }: Props) {
                 onClose={() => setOpen(false)}
                 transaction={transaction}
                 borrowerName={transaction.borrowerName}
+                outstanding={transaction.outstanding}
             />
         </>
     );
