@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Printer } from "@phosphor-icons/react";
 import { formatDateTime } from "@/lib/calculations";
-import type { BorrowerSummary } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
 import type { Transaction } from "@/lib/types";
 
@@ -15,7 +14,6 @@ interface ReceiptModalProps {
     borrowerName: string;
     borrowerPhone?: string;
     borrowerAddress?: string;
-    summary?: BorrowerSummary;
 }
 
 export function ReceiptModal({
@@ -25,7 +23,6 @@ export function ReceiptModal({
     borrowerName,
     borrowerPhone,
     borrowerAddress,
-    summary,
 }: ReceiptModalProps) {
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -139,29 +136,6 @@ export function ReceiptModal({
                     </p>
                 )}
             </div>
-
-            {summary && (
-                <div style={{ borderTop: "1px dashed #d1d5db", paddingTop: "1rem" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "0.375rem" }}>
-                        <span style={{ color: "#6b7280" }}>মোট বাকি</span>
-                        <span style={{ color: "#1f2937", fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>
-                            {formatBDT(summary.totalBorrowed)}
-                        </span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "0.375rem" }}>
-                        <span style={{ color: "#6b7280" }}>মোট জমা</span>
-                        <span style={{ color: "#10b981", fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>
-                            {formatBDT(summary.totalPaid)}
-                        </span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 600, borderTop: "1px solid #e5e7eb", paddingTop: "0.25rem" }}>
-                        <span style={{ color: "#1f2937" }}>বকেয়া</span>
-                        <span style={{ color: summary.outstanding > 0 ? "#ef4444" : "#10b981", fontVariantNumeric: "tabular-nums" }}>
-                            {formatBDT(summary.outstanding)}
-                        </span>
-                    </div>
-                </div>
-            )}
 
             <div style={{ marginTop: "2rem", paddingTop: "1rem", borderTop: "1px dashed #d1d5db" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>

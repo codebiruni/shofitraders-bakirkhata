@@ -127,7 +127,7 @@ export function InvoiceList({
     <img class="letterhead-logo" src="/assets/logo.webp" alt="Shofi Traders" />
     <div><h1>SHOFI TRADERS</h1><p class="tagline">Trusted Supplier &bull; Quality Products &bull; Reliable Delivery</p></div>
   </div>
-  <div class="letterhead-right"><p>Dhaka, Bangladesh</p><p>contact@shofitraders.com</p></div>
+  <div class="letterhead-right"><p>Munshirhat Bazar,Chauddagram,Cumilla</p><p>+8801311392727</p></div>
 </div>
 <div class="doc-title">Delivery Challan</div>
 <div class="meta-row">
@@ -159,14 +159,24 @@ ${d.deliveryNote ? '<div class="delivery-note"><span class="label">Delivery Note
   <div class="sig-block"><div class="sig-title">Received By</div><div class="sig-line">Customer Signature &amp; Date</div></div>
 </div>
 <div class="footer">This is a computer-generated document. For any queries, please contact Shofi Traders.</div>
-<script>window.onload=function(){window.print();setTimeout(function(){window.close();},500);}</script>
 </body>
 </html>`;
 
-            const win = window.open("", "_blank", "width=900,height=700");
-            if (!win) return;
-            win.document.write(html);
-            win.document.close();
+            const frame = document.createElement("iframe");
+            frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;";
+            frame.onload = () => {
+                setTimeout(() => {
+                    frame.contentWindow?.focus();
+                    frame.contentWindow?.print();
+                    setTimeout(() => frame.remove(), 1000);
+                }, 250);
+            };
+            document.body.appendChild(frame);
+            const doc = frame.contentDocument;
+            if (!doc) return;
+            doc.open();
+            doc.write(html);
+            doc.close();
         } catch {
             toast.error("Failed to load invoice for printing");
         }

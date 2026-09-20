@@ -65,6 +65,10 @@ async function generateReceiptNo(db: Awaited<ReturnType<typeof getDb>>): Promise
  * Fire-and-forget SMS notification. Never blocks or fails the transaction if
  * the borrower has no phone or the SMS provider errors, but every outcome is
  * logged so a missing message can actually be diagnosed.
+ *
+ * The body is deliberately terse (typically 2 SMS segments at most): one line
+ * naming this transaction, then the running balance. The receipt carries the
+ * full detail, so nothing beyond that is repeated here.
  */
 async function notifyTransactionBySms(
   borrowerId: string,
@@ -83,8 +87,31 @@ async function notifyTransactionBySms(
       );
       return;
     }
-    const label = type === "borrowed" ? "নতুন ঋণ" : "পেমেন্ট";
-    const message = `SHOFI TRADERS: টেস্ট মেসেজ — ${borrower.name} এর ${label} ${formatBDT(amount)} রেকর্ড হয়েছে।`;
+
+    // Summary is read after the insert, so it already includes this transaction.
+    let summaryLine = "";
+    try {
+      const db = await getDb();
+      const txs = await db
+        .collection<Transaction>(TRANSACTIONS)
+        .find({ borrowerId })
+        .toArray();
+      const { totalBorrowed, totalPaid, outstanding } = summarizeTransactions(txs);
+      summaryLine =
+        `\nমোট বাকি: ${formatBDT(totalBorrowed)}` +
+        `\nমোট জমা: ${formatBDT(totalPaid)}` +
+        `\nবকেয়া: ${formatBDT(outstanding)}`;
+    } catch (err) {
+      // A missing summary must not cost us the notification itself.
+      console.error("[sms] summary lookup failed", err);
+    }
+
+    const line =
+      type === "borrowed"
+        ? `বাকি নেওয়া হয়েছে: ${formatBDT(amount)}`
+        : `জমা হয়েছে: ${formatBDT(amount)}`;
+
+    const message = `SHOFI TRADERS\n${borrower.name}\n${line}${summaryLine}\nধন্যবাদ।`;
     const result = await sendSms(borrower.phone, message);
     if (!result.ok) {
       console.error(

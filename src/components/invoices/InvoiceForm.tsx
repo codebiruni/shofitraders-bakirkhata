@@ -392,8 +392,8 @@ export function InvoiceForm({
     </div>
   </div>
   <div class="letterhead-right">
-    <p>Dhaka, Bangladesh</p>
-    <p>contact@shofitraders.com</p>
+    <p>Munshirhat Bazar,Chauddagram,Cumilla</p>
+    <p>+8801311392727</p>
   </div>
 </div>
 
@@ -481,19 +481,24 @@ ${deliveryNote ? `
   This is a computer-generated document. For any queries, please contact Shofi Traders.
 </div>
 
-<script>
-  window.onload = function() {
-    window.print();
-    setTimeout(function() { window.close(); }, 500);
-  };
-</script>
 </body>
 </html>`;
 
-        const win = window.open("", "_blank", "width=900,height=700");
-        if (!win) return;
-        win.document.write(html);
-        win.document.close();
+        const frame = document.createElement("iframe");
+        frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;";
+        frame.onload = () => {
+            setTimeout(() => {
+                frame.contentWindow?.focus();
+                frame.contentWindow?.print();
+                setTimeout(() => frame.remove(), 1000);
+            }, 250);
+        };
+        document.body.appendChild(frame);
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        doc.open();
+        doc.write(html);
+        doc.close();
     };
 
     const inputClass =
@@ -588,8 +593,8 @@ ${deliveryNote ? `
                         </div>
                     </div>
                     <div className="text-right text-xs text-ink-soft space-y-0.5">
-                        <p>Dhaka, Bangladesh</p>
-                        <p>contact@shofitraders.com</p>
+                        <p>Munshirhat Bazar,Chauddagram,Cumilla</p>
+                        <p>+8801311392727</p>
                     </div>
                 </div>
 

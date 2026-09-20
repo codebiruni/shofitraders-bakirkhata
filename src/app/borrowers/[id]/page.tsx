@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Phone, Note } from "@phosphor-icons/react/dist/ssr";
-import { StatCard } from "@/components/ui/StatCard";
 import { findBorrowerById, findTransactionsByBorrower } from "@/lib/queries";
 import { summarizeTransactions } from "@/lib/calculations";
 import { objectIdSchema } from "@/lib/validators";
@@ -77,28 +76,12 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
         />
       </header>
 
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard label="মোট বাকি" value={summary.totalBorrowed} />
-        <StatCard label="মোট জমা" value={summary.totalPaid} />
-        <StatCard
-          label="এখনো পাওনা"
-          value={summary.outstanding}
-          prominent
-          hint={
-            summary.outstanding > 0
-              ? `${borrower.name}-এর কাছে এখনো পাওনা`
-              : "হিসাব মিটে গেছে"
-          }
-        />
-      </section>
-
       <TransactionHistory
         borrowerId={borrower._id}
         borrowerName={borrower.name}
         borrowerPhone={borrower.phone}
         borrowerAddress={borrower.address}
         transactions={transactions}
-        summary={summary}
       />
 
       <p className="text-center text-xs text-ink-soft">

@@ -9,7 +9,6 @@ import { deleteTransaction } from "@/app/actions/transactions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ReceiptModal } from "@/components/transactions/ReceiptModal";
 import { formatDate, formatDateTime } from "@/lib/calculations";
-import type { BorrowerSummary } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
 import type { Transaction } from "@/lib/types";
 
@@ -19,10 +18,9 @@ interface Props {
   borrowerPhone?: string;
   borrowerAddress?: string;
   transactions: Transaction[];
-  summary: BorrowerSummary;
 }
 
-export function TransactionHistory({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions, summary }: Props) {
+export function TransactionHistory({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
   return (
     <div className="ledger-card overflow-hidden">
       <div className="flex items-center justify-between border-b border-base-300 px-4 py-3 sm:px-5">
@@ -38,7 +36,6 @@ export function TransactionHistory({ borrowerId, borrowerName, borrowerPhone, bo
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
           transactions={transactions}
-          summary={summary}
         />
       </div>
       <div className="md:hidden">
@@ -48,14 +45,13 @@ export function TransactionHistory({ borrowerId, borrowerName, borrowerPhone, bo
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
           transactions={transactions}
-          summary={summary}
         />
       </div>
     </div>
   );
 }
 
-function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions, summary }: Props) {
+function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
   if (transactions.length === 0) {
     return (
       <div className="px-6 py-10 text-center">
@@ -88,7 +84,6 @@ function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress
               borrowerPhone={borrowerPhone}
               borrowerAddress={borrowerAddress}
               tx={tx}
-              summary={summary}
             />
           ))}
         </tbody>
@@ -97,7 +92,7 @@ function DesktopTable({ borrowerId, borrowerName, borrowerPhone, borrowerAddress
   );
 }
 
-function MobileList({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions, summary }: Props) {
+function MobileList({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
   if (transactions.length === 0) {
     return (
       <div className="px-6 py-10 text-center">
@@ -118,7 +113,6 @@ function MobileList({ borrowerId, borrowerName, borrowerPhone, borrowerAddress, 
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
           tx={tx}
-          summary={summary}
         />
       ))}
     </ul>
@@ -131,14 +125,12 @@ function TransactionRow({
   borrowerPhone,
   borrowerAddress,
   tx,
-  summary,
 }: {
   borrowerId: string;
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
   tx: Transaction;
-  summary: BorrowerSummary;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -205,7 +197,6 @@ function TransactionRow({
         borrowerName={borrowerName}
         borrowerPhone={borrowerPhone}
         borrowerAddress={borrowerAddress}
-        summary={summary}
       />
     </>
   );
@@ -217,14 +208,12 @@ function MobileRow({
   borrowerPhone,
   borrowerAddress,
   tx,
-  summary,
 }: {
   borrowerId: string;
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
   tx: Transaction;
-  summary: BorrowerSummary;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -290,7 +279,6 @@ function MobileRow({
         borrowerName={borrowerName}
         borrowerPhone={borrowerPhone}
         borrowerAddress={borrowerAddress}
-        summary={summary}
       />
     </>
   );
