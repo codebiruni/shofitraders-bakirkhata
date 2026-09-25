@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { Plus, Trash, Printer, FloppyDisk, X, CheckCircle } from "@phosphor-icons/react";
 import { numberToWords, formatDateTime } from "@/lib/format";
 import type { EditableInvoice } from "@/lib/types";
+import { getNextInvoiceNumber } from "@/lib/invoice-actions";
 
 type PricingType = "weight" | "pcs";
 
@@ -37,15 +38,13 @@ export function InvoiceForm({
     initialInvoice?: EditableInvoice | null;
     onExitEdit?: () => void;
 }) {
-    const generateInvoiceNo = () => {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        return `ST-${yyyy}${mm}-${random}`;
-    };
+    const [invoiceNo, setInvoiceNo] = useState(initialInvoice?.invoiceNo ?? "");
 
-    const [invoiceNo, setInvoiceNo] = useState(initialInvoice?.invoiceNo ?? generateInvoiceNo());
+    useEffect(() => {
+        if (!initialInvoice) {
+            getNextInvoiceNumber().then(setInvoiceNo);
+        }
+    }, [initialInvoice]);
     const [date, setDate] = useState(
         () => initialInvoice?.date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)
     );
@@ -117,7 +116,7 @@ export function InvoiceForm({
     };
 
     const resetForm = () => {
-        setInvoiceNo(generateInvoiceNo());
+        getNextInvoiceNumber().then(setInvoiceNo);
         setDate(new Date().toISOString().slice(0, 10));
         setTime(new Date().toTimeString().slice(0, 5));
         setEditingId(null);
@@ -134,15 +133,14 @@ export function InvoiceForm({
         setDeliveryNote("");
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const saveInvoice = async () => {
         if (!customerName.trim()) {
             toast.error("Customer name is required");
-            return;
+            return false;
         }
         if (!deliveryAddress.trim()) {
             toast.error("Delivery address is required");
-            return;
+            return false;
         }
         setLoading(true);
         try {
@@ -193,13 +191,28 @@ export function InvoiceForm({
                     resetForm();
                 }
                 setSavedAt(saved);
+                return true;
             } else {
                 toast.error(json.error || "Failed to save invoice");
+                return false;
             }
         } catch {
             toast.error("Failed to save invoice");
+            return false;
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await saveInvoice();
+    };
+
+    const handlePrintAndSave = async () => {
+        const success = await saveInvoice();
+        if (success) {
+            handlePrint();
         }
     };
 
@@ -563,20 +576,12 @@ ${deliveryNote ? `
                     </button>
                     <button
                         type="button"
-                        onClick={handlePrint}
-                        className="btn btn-outline btn-sm gap-1.5"
-                    >
-                        <Printer size={16} />
-                        Print
-                    </button>
-                    <button
-                        type="submit"
-                        form="invoice-form"
+                        onClick={handlePrintAndSave}
                         disabled={loading}
                         className="btn btn-primary btn-sm gap-1.5"
                     >
-                        <FloppyDisk size={16} />
-                        {loading ? "Saving…" : editingId ? "Update Invoice" : "Save Invoice"}
+                        <Printer size={16} />
+                        {loading ? "Saving…" : "Print & Save"}
                     </button>
                 </div>
             </div>

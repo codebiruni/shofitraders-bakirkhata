@@ -1,6 +1,26 @@
+"use server";
+
 import { getDb } from "./mongodb";
 import type { Invoice, InvoiceItem } from "./types";
 import { ObjectId } from "mongodb";
+
+export async function getNextInvoiceNumber() {
+    try {
+        const db = await getDb();
+        const lastInvoice = await db.collection<Invoice>("invoices").find({}).sort({ invoiceNo: -1 }).limit(1).toArray();
+        if (lastInvoice.length === 0) {
+            return "000001";
+        }
+        const lastNo = parseInt(lastInvoice[0].invoiceNo, 10);
+        if (isNaN(lastNo)) {
+            return "000001";
+        }
+        return String(lastNo + 1).padStart(6, '0');
+    } catch (err) {
+        console.error("[getNextInvoiceNumber]", err);
+        return "000001";
+    }
+}
 
 export async function createInvoice(data: Omit<Invoice, "_id" | "createdAt" | "updatedAt">) {
     try {
