@@ -38,6 +38,10 @@ export interface TransactionWithBorrower extends Transaction {
   outstanding?: number;
 }
 
+export interface TransactionWithBalance extends Transaction {
+  runningBalance: number;
+}
+
 export type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string };

@@ -11,7 +11,7 @@ import { ReceiptModal } from "@/components/transactions/ReceiptModal";
 import { formatDateTime, summarizeTransactions } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
 import { paymentMethodLabel } from "@/lib/payment-methods";
-import type { Transaction } from "@/lib/types";
+import type { Transaction, TransactionWithBalance } from "@/lib/types";
 
 interface Props {
   borrowerName: string;
@@ -73,7 +73,8 @@ export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddres
   );
 }
 
-interface TableProps extends Props {
+interface TableProps extends Omit<Props, 'transactions'> {
+  transactions: TransactionWithBalance[];
   outstanding: number;
 }
 
@@ -156,7 +157,7 @@ function TransactionRow({
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
-  tx: Transaction & { runningBalance: number };
+  tx: TransactionWithBalance;
   outstanding: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -243,7 +244,7 @@ function MobileRow({
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
-  tx: Transaction & { runningBalance: number };
+  tx: TransactionWithBalance;
   outstanding: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
