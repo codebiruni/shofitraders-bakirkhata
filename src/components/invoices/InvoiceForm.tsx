@@ -37,7 +37,15 @@ export function InvoiceForm({
     initialInvoice?: EditableInvoice | null;
     onExitEdit?: () => void;
 }) {
-    const [invoiceNo, setInvoiceNo] = useState(initialInvoice?.invoiceNo ?? "");
+    const generateInvoiceNo = () => {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        return `ST-${yyyy}${mm}-${random}`;
+    };
+
+    const [invoiceNo, setInvoiceNo] = useState(initialInvoice?.invoiceNo ?? generateInvoiceNo());
     const [date, setDate] = useState(
         () => initialInvoice?.date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)
     );
@@ -109,7 +117,7 @@ export function InvoiceForm({
     };
 
     const resetForm = () => {
-        setInvoiceNo("");
+        setInvoiceNo(generateInvoiceNo());
         setDate(new Date().toISOString().slice(0, 10));
         setTime(new Date().toTimeString().slice(0, 5));
         setEditingId(null);
@@ -613,10 +621,10 @@ ${deliveryNote ? `
                         <div>
                             <label className={labelClass}>Invoice No.</label>
                             <input
-                                className={inputClass}
-                                placeholder="Auto-generated or enter manually"
+                                className={`${inputClass} disabled:bg-base-200 disabled:text-ink-soft`}
+                                placeholder="Auto-generated"
                                 value={invoiceNo}
-                                onChange={(e) => setInvoiceNo(e.target.value)}
+                                disabled
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-3">

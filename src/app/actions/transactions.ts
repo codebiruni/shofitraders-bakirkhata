@@ -99,7 +99,6 @@ async function notifyTransactionBySms(
       const { totalBorrowed, totalPaid, outstanding } = summarizeTransactions(txs);
       summaryLine =
         `\nমোট বাকি: ${formatBDT(totalBorrowed)}` +
-        `\nমোট জমা: ${formatBDT(totalPaid)}` +
         `\nবকেয়া: ${formatBDT(outstanding)}`;
     } catch (err) {
       // A missing summary must not cost us the notification itself.

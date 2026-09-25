@@ -22,20 +22,41 @@ interface Props {
 
 export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
   const summary = summarizeTransactions(transactions);
+
+  // Calculate running balance
+  const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  let runningBalance = 0;
+  const transactionsWithBalance = sortedTransactions.map(tx => {
+    const amount = Number(tx.amount) || 0;
+    if (tx.type === "borrowed") runningBalance += amount;
+    else if (tx.type === "payment") runningBalance -= amount;
+    return { ...tx, runningBalance };
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return (
     <div className="ledger-card overflow-hidden">
       <div className="flex items-center justify-between border-b border-base-300 px-4 py-3 sm:px-5">
         <h2 className="text-sm font-semibold text-ink">হিসাবের ইতিহাস</h2>
-        <p className="text-xs text-ink-soft">
-          {transactions.length}টি এন্ট্রি
-        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="btn btn-primary btn-xs rounded-md gap-1.5 print:hidden"
+          >
+            <Printer size={16} weight="regular" />
+            PDF ডাউনলোড
+          </button>
+          <p className="text-xs text-ink-soft">
+            {transactions.length}টি এন্ট্রি
+          </p>
+        </div>
       </div>
       <div className="hidden md:block">
         <DesktopTable
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
-          transactions={transactions}
+          transactions={transactionsWithBalance}
           outstanding={summary.outstanding}
         />
       </div>
@@ -44,7 +65,7 @@ export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddres
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
-          transactions={transactions}
+          transactions={transactionsWithBalance}
           outstanding={summary.outstanding}
         />
       </div>
@@ -77,7 +98,8 @@ function DesktopTable({ borrowerName, borrowerPhone, borrowerAddress, transactio
             <th className="text-right font-medium">টাকা</th>
             <th className="font-medium">মাধ্যম</th>
             <th className="font-medium">নোট</th>
-            <th className="text-right font-medium">অ্যাকশন</th>
+            <th className="text-right font-medium">বকেয়া</th>
+            <th className="text-right font-medium print:hidden">অ্যাকশন</th>
           </tr>
         </thead>
         <tbody>
@@ -134,7 +156,7 @@ function TransactionRow({
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
-  tx: Transaction;
+  tx: Transaction & { runningBalance: number };
   outstanding: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -167,7 +189,10 @@ function TransactionRow({
         <td className="max-w-[14rem] truncate text-sm text-ink-soft">
           {tx.note || "—"}
         </td>
-        <td className="text-right">
+        <td className="text-right text-sm font-medium tabular-nums text-ink">
+          {formatBDT(tx.runningBalance)}
+        </td>
+        <td className="text-right print:hidden">
           <div className="flex items-center justify-end gap-0.5">
             <button
               type="button"
@@ -218,7 +243,7 @@ function MobileRow({
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
-  tx: Transaction;
+  tx: Transaction & { runningBalance: number };
   outstanding: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -246,6 +271,9 @@ function MobileRow({
               {tx.paymentMethod
                 ? ` · ${paymentMethodLabel(tx.paymentMethod)}`
                 : ""}
+            </p>
+            <p className="mt-1 text-xs text-ink">
+              বকেয়া: {formatBDT(tx.runningBalance)}
             </p>
             {tx.note && (
               <p className="mt-1 truncate text-xs text-ink-soft">{tx.note}</p>

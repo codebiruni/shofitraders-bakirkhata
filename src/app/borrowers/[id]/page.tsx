@@ -6,6 +6,7 @@ import { summarizeTransactions } from "@/lib/calculations";
 import { objectIdSchema } from "@/lib/validators";
 import { TransactionActionButtons } from "@/components/transactions/TransactionActionButtons";
 import { TransactionHistory } from "@/components/transactions/TransactionHistory";
+import { StatCard } from "@/components/ui/StatCard";
 import { formatBDT } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,7 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
     <div className="space-y-8">
       <Link
         href="/borrowers"
-        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink"
+        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink print:hidden"
       >
         <ArrowLeft size={14} weight="regular" />
         কাস্টমারের তালিকায় ফিরুন
@@ -70,11 +71,23 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
             </p>
           )}
         </div>
-        <TransactionActionButtons
-          borrowerId={borrower._id}
-          outstanding={summary.outstanding}
-        />
+        <div className="print:hidden">
+          <TransactionActionButtons
+            borrowerId={borrower._id}
+            outstanding={summary.outstanding}
+          />
+        </div>
       </header>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="মোট ঋণ" value={summary.totalBorrowed} />
+        <StatCard label="মোট পরিশোধ" value={summary.totalPaid} />
+        <StatCard
+          label="বকেয়া"
+          value={summary.outstanding}
+          prominent
+        />
+      </div>
 
       <TransactionHistory
         borrowerName={borrower.name}
