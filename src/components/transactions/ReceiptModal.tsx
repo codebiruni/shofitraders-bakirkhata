@@ -16,6 +16,7 @@ interface ReceiptModalProps {
     borrowerPhone?: string;
     borrowerAddress?: string;
     outstanding?: number;
+    deposit?: number;
 }
 
 export function ReceiptModal({
@@ -26,6 +27,7 @@ export function ReceiptModal({
     borrowerPhone,
     borrowerAddress,
     outstanding,
+    deposit,
 }: ReceiptModalProps) {
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -140,17 +142,27 @@ export function ReceiptModal({
                 )}
             </div>
 
-            {typeof outstanding === "number" && (
+            {(typeof outstanding === "number" || typeof deposit === "number") && (
                 <div style={{ backgroundColor: "#f9fafb", borderRadius: "0.5rem", padding: "0.75rem", marginBottom: "1rem" }}>
                     <p style={{ fontSize: "10px", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 0.25rem" }}>
                         মোট হিসাব
                     </p>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "12px", color: "#6b7280" }}>মোট পাওয়া</span>
-                        <span style={{ fontSize: "12px", fontWeight: 700, color: "#1f2937", fontVariantNumeric: "tabular-nums" }}>
-                            {formatBDT(outstanding)}
-                        </span>
-                    </div>
+                    {typeof outstanding === "number" && (
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ fontSize: "12px", color: "#6b7280" }}>মোট পাওনা</span>
+                            <span style={{ fontSize: "12px", fontWeight: 700, color: "#1f2937", fontVariantNumeric: "tabular-nums" }}>
+                                {formatBDT(outstanding)}
+                            </span>
+                        </div>
+                    )}
+                    {typeof deposit === "number" && deposit > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ fontSize: "12px", color: "#6b7280" }}>ডিপোজিট</span>
+                            <span style={{ fontSize: "12px", fontWeight: 700, color: "#1f2937", fontVariantNumeric: "tabular-nums" }}>
+                                {formatBDT(deposit)}
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
 

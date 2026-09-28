@@ -18,11 +18,10 @@ interface Props {
   borrowerPhone?: string;
   borrowerAddress?: string;
   transactions: Transaction[];
+  summary: ReturnType<typeof summarizeTransactions>;
 }
 
-export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddress, transactions }: Props) {
-  const summary = summarizeTransactions(transactions);
-
+export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddress, transactions, summary }: Props) {
   // Calculate running balance
   const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   let runningBalance = 0;
@@ -58,6 +57,7 @@ export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddres
           borrowerAddress={borrowerAddress}
           transactions={transactionsWithBalance}
           outstanding={summary.outstanding}
+          deposit={summary.deposit}
         />
       </div>
       <div className="md:hidden">
@@ -67,18 +67,20 @@ export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddres
           borrowerAddress={borrowerAddress}
           transactions={transactionsWithBalance}
           outstanding={summary.outstanding}
+          deposit={summary.deposit}
         />
       </div>
     </div>
   );
 }
 
-interface TableProps extends Omit<Props, 'transactions'> {
+interface TableProps extends Omit<Props, 'transactions' | 'summary'> {
   transactions: TransactionWithBalance[];
   outstanding: number;
+  deposit: number;
 }
 
-function DesktopTable({ borrowerName, borrowerPhone, borrowerAddress, transactions, outstanding }: TableProps) {
+function DesktopTable({ borrowerName, borrowerPhone, borrowerAddress, transactions, outstanding, deposit }: TableProps) {
   if (transactions.length === 0) {
     return (
       <div className="px-6 py-10 text-center">
@@ -112,6 +114,7 @@ function DesktopTable({ borrowerName, borrowerPhone, borrowerAddress, transactio
               borrowerAddress={borrowerAddress}
               tx={tx}
               outstanding={outstanding}
+              deposit={deposit}
             />
           ))}
         </tbody>
@@ -120,7 +123,7 @@ function DesktopTable({ borrowerName, borrowerPhone, borrowerAddress, transactio
   );
 }
 
-function MobileList({ borrowerName, borrowerPhone, borrowerAddress, transactions, outstanding }: TableProps) {
+function MobileList({ borrowerName, borrowerPhone, borrowerAddress, transactions, outstanding, deposit }: TableProps) {
   if (transactions.length === 0) {
     return (
       <div className="px-6 py-10 text-center">
@@ -141,6 +144,7 @@ function MobileList({ borrowerName, borrowerPhone, borrowerAddress, transactions
           borrowerAddress={borrowerAddress}
           tx={tx}
           outstanding={outstanding}
+          deposit={deposit}
         />
       ))}
     </ul>
@@ -152,13 +156,15 @@ function TransactionRow({
   borrowerPhone,
   borrowerAddress,
   outstanding,
+  deposit,
   tx,
 }: {
   borrowerName: string;
   borrowerPhone?: string;
   borrowerAddress?: string;
-  tx: TransactionWithBalance;
   outstanding: number;
+  deposit: number;
+  tx: TransactionWithBalance;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -191,7 +197,7 @@ function TransactionRow({
           {tx.note || "—"}
         </td>
         <td className="text-right text-sm font-medium tabular-nums text-ink">
-          {formatBDT(tx.runningBalance)}
+          {tx.runningBalance < 0 ? "ডিপোজিট" : "বকেয়া"}: {formatBDT(Math.abs(tx.runningBalance))}
         </td>
         <td className="text-right print:hidden">
           <div className="flex items-center justify-end gap-0.5">
@@ -229,6 +235,7 @@ function TransactionRow({
         borrowerPhone={borrowerPhone}
         borrowerAddress={borrowerAddress}
         outstanding={outstanding}
+        deposit={deposit}
       />
     </>
   );
@@ -239,6 +246,7 @@ function MobileRow({
   borrowerPhone,
   borrowerAddress,
   outstanding,
+  deposit,
   tx,
 }: {
   borrowerName: string;
@@ -246,6 +254,7 @@ function MobileRow({
   borrowerAddress?: string;
   tx: TransactionWithBalance;
   outstanding: number;
+  deposit: number;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -274,7 +283,7 @@ function MobileRow({
                 : ""}
             </p>
             <p className="mt-1 text-xs text-ink">
-              বকেয়া: {formatBDT(tx.runningBalance)}
+              {tx.runningBalance < 0 ? "ডিপোজিট" : "বকেয়া"}: {formatBDT(Math.abs(tx.runningBalance))}
             </p>
             {tx.note && (
               <p className="mt-1 truncate text-xs text-ink-soft">{tx.note}</p>

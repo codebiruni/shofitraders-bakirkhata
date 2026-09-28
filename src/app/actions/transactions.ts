@@ -96,10 +96,10 @@ async function notifyTransactionBySms(
         .collection<Transaction>(TRANSACTIONS)
         .find({ borrowerId })
         .toArray();
-      const { totalBorrowed, totalPaid, outstanding } = summarizeTransactions(txs);
+      const { totalBorrowed, totalPaid, outstanding, deposit } = summarizeTransactions(txs);
       summaryLine =
         `\nমোট বাকি: ${formatBDT(totalBorrowed)}` +
-        `\nবকেয়া: ${formatBDT(outstanding)}`;
+        `\n${outstanding > 0 ? "বকেয়া" : "ডিপোজিট"}: ${formatBDT(outstanding > 0 ? outstanding : deposit)}`;
     } catch (err) {
       // A missing summary must not cost us the notification itself.
       console.error("[sms] summary lookup failed", err);
@@ -186,10 +186,7 @@ export async function recordPayment(formData: FormData): Promise<ActionResult<{ 
       .collection<Transaction>(TRANSACTIONS)
       .find({ borrowerId: idCheck.data })
       .toArray();
-    const { outstanding } = summarizeTransactions(txs);
-    if (parsed.data.amount - outstanding > 0.0001) {
-      return bad("Payment exceeds the current outstanding balance.");
-    }
+    // Removed outstanding check to allow deposits
   } catch (err) {
     console.error("[recordPayment] outstanding check failed", err);
     return bad("Something went wrong. Please try again.");

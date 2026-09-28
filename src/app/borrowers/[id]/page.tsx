@@ -79,7 +79,7 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <StatCard label="মোট ঋণ" value={summary.totalBorrowed} />
         <StatCard label="মোট পরিশোধ" value={summary.totalPaid} />
         <StatCard
@@ -87,6 +87,9 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
           value={summary.outstanding}
           prominent
         />
+        {summary.deposit > 0 && (
+          <StatCard label="ডিপোজিট" value={summary.deposit} />
+        )}
       </div>
 
       <TransactionHistory
@@ -94,6 +97,7 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
         borrowerPhone={borrower.phone}
         borrowerAddress={borrower.address}
         transactions={transactions}
+        summary={summary}
       />
 
       <p className="text-center text-xs text-ink-soft">

@@ -5,6 +5,7 @@ export interface BorrowerSummary {
   totalBorrowed: number;
   totalPaid: number;
   outstanding: number;
+  deposit: number;
   lastActivity: Date | null;
   status: "paid" | "due";
 }
@@ -34,9 +35,10 @@ export function summarizeTransactions(
   }
 
   const outstanding = Math.max(0, totalBorrowed - totalPaid);
+  const deposit = Math.max(0, totalPaid - totalBorrowed);
   const status: "paid" | "due" = outstanding > 0 ? "due" : "paid";
 
-  return { totalBorrowed, totalPaid, outstanding, lastActivity, status };
+  return { totalBorrowed, totalPaid, outstanding, deposit, lastActivity, status };
 }
 
 /**
