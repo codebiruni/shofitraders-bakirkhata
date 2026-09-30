@@ -620,9 +620,9 @@ ${deliveryNote ? `
                     </div>
                 </div>
 
-                <form id="invoice-form" onSubmit={handleSubmit} className="px-8 pb-8">
+                <form id="invoice-form" onSubmit={handleSubmit} className="px-4 pb-6 sm:px-8 sm:pb-8">
                     {/* Invoice Details Row */}
-                    <div className="grid grid-cols-2 gap-6 mt-6 pb-5 border-b border-dashed border-base-300">
+                    <div className="mt-6 grid grid-cols-1 gap-4 border-b border-dashed border-base-300 pb-5 sm:grid-cols-2 sm:gap-6">
                         <div>
                             <label className={labelClass}>Invoice No.</label>
                             <input
@@ -656,7 +656,7 @@ ${deliveryNote ? `
                     </div>
 
                     {/* Bill To / Ship To */}
-                    <div className="grid grid-cols-2 gap-6 mt-5">
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                         <div className="border border-base-300 rounded-md p-4 bg-base-100/50">
                             <h4 className="text-[10px] font-bold uppercase tracking-[2px] text-ink-soft mb-3">
                                 Bill To
@@ -892,7 +892,7 @@ ${deliveryNote ? `
                         <h4 className="text-[10px] font-bold uppercase tracking-[2px] text-ink-soft mb-3">
                             Pricing
                         </h4>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div className="space-y-3">
                                 <div>
                                     <label className="text-[11px] font-medium text-ink-soft">
@@ -922,7 +922,7 @@ ${deliveryNote ? `
                                 </div>
                             </div>
                             <div className="flex justify-end">
-                                <div className="w-64 space-y-2">
+                                <div className="w-full space-y-2 sm:w-64">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-ink-soft">Sub Total</span>
                                         <span className="font-semibold text-ink tabular-nums">
@@ -990,7 +990,7 @@ ${deliveryNote ? `
 
                     {/* Signature Blocks */}
                     <div className="mt-8 pt-5 border-t border-base-300">
-                        <div className="grid grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
                             <div className="text-center">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-soft mb-8">
                                     Prepared By

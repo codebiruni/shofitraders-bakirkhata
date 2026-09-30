@@ -232,7 +232,7 @@ ${d.deliveryNote ? '<div class="delivery-note"><span class="label">Delivery Note
                                 className="group flex items-center justify-between rounded-lg border border-base-300 bg-white px-4 py-3.5 transition-all hover:border-primary/30 hover:shadow-sm"
                             >
                                 <div className="flex items-center gap-4 min-w-0">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                                    <div className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                                         <FileText size={18} />
                                     </div>
                                     <div className="min-w-0">
@@ -245,46 +245,35 @@ ${d.deliveryNote ? '<div class="delivery-note"><span class="label">Delivery Note
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 shrink-0">
-                                    <div className="hidden sm:block text-right">
+                                <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                                    <div className="text-right">
                                         <p className="text-xs font-medium text-ink">
                                             {new Date(inv.date).toLocaleDateString("en-IN", {
                                                 day: "numeric",
                                                 month: "short",
                                                 year: "numeric",
                                             })}
-                                            {inv.time ? ` · ${inv.time}` : ""}
-                                        </p>
-                                        <p className="text-[11px] text-green-700">
-                                            Saved {formatDateTime(inv.updatedAt ?? inv.createdAt)}
                                         </p>
                                         <p className="text-[11px] text-ink-soft">
-                                            Remaining: ৳ {inv.remainingTotal?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "—"}
+                                            ৳ {inv.remainingTotal?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "—"}
                                         </p>
                                     </div>
 
                                     <button
                                         onClick={() => onEdit(inv)}
-                                        className="btn btn-ghost btn-xs gap-1 text-primary sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                        className="btn btn-ghost btn-xs gap-1 text-primary"
                                         title="Edit invoice"
                                     >
-                                        <PencilSimple size={14} />
-                                        Edit
+                                        <PencilSimple size={16} />
                                     </button>
 
                                     <button
                                         onClick={() => handlePrintInvoice(inv)}
-                                        className="btn btn-ghost btn-xs gap-1 text-ink-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                        className="btn btn-ghost btn-xs gap-1 text-ink-soft"
                                         title="Print invoice"
                                     >
-                                        <Printer size={14} />
-                                        Print
+                                        <Printer size={16} />
                                     </button>
-
-                                    <CaretRight
-                                        size={14}
-                                        className="text-ink-soft/30 shrink-0"
-                                    />
                                 </div>
                             </div>
                         ))}

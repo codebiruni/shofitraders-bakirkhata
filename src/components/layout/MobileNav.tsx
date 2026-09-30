@@ -6,6 +6,7 @@ import {
   House,
   Users,
   Receipt,
+  FileText,
   ChatTeardropText,
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/cn";
@@ -15,6 +16,7 @@ const NAV = [
   { href: "/", label: "ড্যাশবোর্ড", icon: House },
   { href: "/borrowers", label: "কাস্টমার", icon: Users },
   { href: "/transactions", label: "হিসাব", icon: Receipt },
+  { href: "/invoices", label: "ইনভয়েস", icon: FileText },
   { href: "/messages", label: "মেসেজ", icon: ChatTeardropText },
 ] as const;
 
@@ -35,7 +37,7 @@ export function MobileNav() {
       </header>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-base-300 bg-base-100/95 backdrop-blur md:hidden">
-        <ul className="mx-auto grid w-full max-w-md grid-cols-4 px-2 pb-[max(env(safe-area-inset-bottom),0.4rem)] pt-1.5">
+        <ul className="mx-auto grid w-full max-w-lg grid-cols-5 px-1 pb-[max(env(safe-area-inset-bottom),0.4rem)] pt-1.5">
           {NAV.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
@@ -44,7 +46,7 @@ export function MobileNav() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-1.5 text-[11px] transition-colors",
+                    "flex flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 text-[10px] transition-colors",
                     active
                       ? "bg-primary/10 font-medium text-primary"
                       : "text-ink-soft hover:bg-base-200 hover:text-ink"
