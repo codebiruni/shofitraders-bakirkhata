@@ -3,6 +3,7 @@ import { ArrowRight, Users } from "@phosphor-icons/react/dist/ssr";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { InstallButton } from "@/components/ui/InstallButton";
 import { ensureIndexes } from "@/lib/queries";
 import { getDb } from "@/lib/mongodb";
 import { summarizeTransactions } from "@/lib/calculations";
@@ -79,13 +80,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold text-ink md:text-3xl">
-          ড্যাশবোর্ড
-        </h1>
-        <p className="text-sm text-ink-soft">
-          আপনার কাস্টমার ও বাকির হিসাব সহজেই রাখুন।
-        </p>
+      <header className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-ink md:text-3xl">
+            ড্যাশবোর্ড
+          </h1>
+          <p className="text-sm text-ink-soft">
+            আপনার কাস্টমার ও বাকির হিসাব সহজেই রাখুন।
+          </p>
+        </div>
+        <InstallButton />
       </header>
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

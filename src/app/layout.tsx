@@ -13,6 +13,12 @@ const notoBengali = Noto_Sans_Bengali({
 export const metadata: Metadata = {
   title: "Shofi Traders বাকির খাতা",
   description: "Shofi Traders এর জন্য সহজ ও গোছানো বাকির হিসাব।",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Shofi Traders",
+  },
 };
 
 export default function RootLayout({
@@ -20,6 +26,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="bn" data-theme="shofi">
+      <head>
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+      </head>
       <body className={`${notoBengali.variable} antialiased`}>
         <AppShell>{children}</AppShell>
         <ToastProvider />
