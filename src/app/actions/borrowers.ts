@@ -68,7 +68,7 @@ export async function createBorrower(formData: FormData): Promise<ActionResult<{
     return bad("Something went wrong. Please try again.");
   }
 
-  revalidateTag("borrowers");
+  revalidateTag("borrowers", undefined as any);
   return ok({ id });
 }
 
@@ -115,9 +115,8 @@ export async function updateBorrower(
     return bad("Something went wrong. Please try again.");
   }
 
-  revalidatePath("/");
-  revalidatePath("/borrowers");
-  revalidatePath(`/borrowers/${id}`);
+  revalidateTag("borrowers", undefined as any);
+  revalidateTag("transactions", undefined as any);
   return ok({ id });
 }
 
@@ -136,9 +135,8 @@ export async function deleteBorrower(id: string): Promise<ActionResult<null>> {
     return bad("Something went wrong. Please try again.");
   }
 
-  revalidatePath("/");
-  revalidatePath("/borrowers");
-  revalidatePath("/transactions");
+  revalidateTag("borrowers", undefined as any);
+  revalidateTag("transactions", undefined as any);
   return ok(null);
 }
 

@@ -156,8 +156,8 @@ export async function addBorrowing(formData: FormData): Promise<ActionResult<{ i
 
   void notifyTransactionBySms(parsed.data.borrowerId, "borrowed", parsed.data.amount);
 
-  revalidateTag("transactions");
-  revalidateTag("borrowers");
+  revalidateTag("transactions", undefined as any);
+  revalidateTag("borrowers", undefined as any);
   return ok({ id });
 }
 
@@ -213,10 +213,8 @@ export async function recordPayment(formData: FormData): Promise<ActionResult<{ 
 
   void notifyTransactionBySms(parsed.data.borrowerId, "payment", parsed.data.amount);
 
-  revalidatePath("/");
-  revalidatePath("/borrowers");
-  revalidatePath(`/borrowers/${parsed.data.borrowerId}`);
-  revalidatePath("/transactions");
+  revalidateTag("transactions", undefined as any);
+  revalidateTag("borrowers", undefined as any);
   return ok({ id });
 }
 
@@ -238,9 +236,7 @@ export async function deleteTransaction(id: string): Promise<ActionResult<null>>
     return bad("Something went wrong. Please try again.");
   }
 
-  revalidatePath("/");
-  revalidatePath("/borrowers");
-  if (borrowerId) revalidatePath(`/borrowers/${borrowerId}`);
-  revalidatePath("/transactions");
+  revalidateTag("transactions", undefined as any);
+  revalidateTag("borrowers", undefined as any);
   return ok(null);
 }

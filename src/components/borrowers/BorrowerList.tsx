@@ -5,7 +5,11 @@ import {
     BorrowerTable,
     BorrowerCardList,
 } from "@/components/borrowers/BorrowerTable";
+import type { BorrowerWithStats } from "@/lib/types";
 
+interface Props {
+    initialBorrowers: BorrowerWithStats[];
+}
 
 export function BorrowerList({ initialBorrowers }: Props) {
     const [optimisticBorrowers, addOptimisticBorrower] = useOptimistic(
@@ -15,7 +19,8 @@ export function BorrowerList({ initialBorrowers }: Props) {
 
     return (
         <>
-
+            <BorrowerTable borrowers={optimisticBorrowers} />
+            <BorrowerCardList borrowers={optimisticBorrowers} />
         </>
     );
 }
