@@ -1,12 +1,10 @@
+import { unstable_cache } from "next/cache";
 import { Users } from "@phosphor-icons/react/dist/ssr";
 import { getDb } from "@/lib/mongodb";
 import { ensureIndexes } from "@/lib/queries";
 import { summarizeTransactions } from "@/lib/calculations";
 import { EmptyState } from "@/components/ui/EmptyState";
-import {
-  BorrowerTable,
-  BorrowerCardList,
-} from "@/components/borrowers/BorrowerTable";
+import { BorrowerList } from "@/components/borrowers/BorrowerList";
 import { BorrowerSearch } from "@/components/borrowers/BorrowerSearch";
 import { CreateBorrowerButton } from "@/components/borrowers/CreateBorrowerButton";
 import type { Borrower, BorrowerWithStats, Transaction } from "@/lib/types";
@@ -19,7 +17,6 @@ interface PageProps {
 
 async function loadBorrowers(q?: string) {
   try {
-    await ensureIndexes();
     const db = await getDb();
     const filter: Record<string, unknown> = {};
     if (q && q.trim()) {
@@ -53,13 +50,20 @@ async function loadBorrowers(q?: string) {
   }
 }
 
+const cachedLoadBorrowers = unstable_cache(
+  loadBorrowers,
+  ["borrowers-list"],
+  { tags: ["borrowers"] }
+);
+
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export default async function BorrowersPage({ searchParams }: PageProps) {
+  await ensureIndexes();
   const { q } = await searchParams;
-  const borrowers = await loadBorrowers(q);
+  const borrowers = await cachedLoadBorrowers(q);
 
   return (
     <div className="space-y-6">
@@ -93,10 +97,7 @@ export default async function BorrowersPage({ searchParams }: PageProps) {
           />
         )
       ) : (
-        <>
-          <BorrowerTable borrowers={borrowers} />
-          <BorrowerCardList borrowers={borrowers} />
-        </>
+        <BorrowerList initialBorrowers={borrowers} />
       )}
     </div>
   );

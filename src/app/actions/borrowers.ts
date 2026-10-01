@@ -1,7 +1,7 @@
 "use server";
 
 import { ObjectId } from "mongodb";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/mongodb";
 import {
@@ -68,8 +68,7 @@ export async function createBorrower(formData: FormData): Promise<ActionResult<{
     return bad("Something went wrong. Please try again.");
   }
 
-  revalidatePath("/");
-  revalidatePath("/borrowers");
+  revalidateTag("borrowers");
   return ok({ id });
 }
 

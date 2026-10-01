@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 3600;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -31,7 +33,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${notoBengali.variable} antialiased`}>
+      <body className={`${notoBengali.variable} antialiased`} suppressHydrationWarning>
         <AppShell>{children}</AppShell>
         <ToastProvider />
         <ServiceWorkerRegister />

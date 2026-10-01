@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { getDb } from "@/lib/mongodb";
@@ -102,13 +103,19 @@ async function loadTransactions(filters: {
   }
 }
 
+const cachedLoadTransactions = unstable_cache(
+  loadTransactions,
+  ["transactions"],
+  { tags: ["transactions"] }
+);
+
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export default async function TransactionsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
-  const txs = await loadTransactions(sp);
+  const txs = await cachedLoadTransactions(sp);
 
   const totals = txs.reduce(
     (acc, t) => {

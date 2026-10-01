@@ -1,7 +1,7 @@
 "use server";
 
 import { ObjectId } from "mongodb";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { getDb } from "@/lib/mongodb";
 import {
   borrowingInputSchema,
@@ -156,10 +156,8 @@ export async function addBorrowing(formData: FormData): Promise<ActionResult<{ i
 
   void notifyTransactionBySms(parsed.data.borrowerId, "borrowed", parsed.data.amount);
 
-  revalidatePath("/");
-  revalidatePath("/borrowers");
-  revalidatePath(`/borrowers/${parsed.data.borrowerId}`);
-  revalidatePath("/transactions");
+  revalidateTag("transactions");
+  revalidateTag("borrowers");
   return ok({ id });
 }
 
