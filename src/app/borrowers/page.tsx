@@ -1,19 +1,19 @@
 import { unstable_cache } from "next/cache";
 import { Users } from "@phosphor-icons/react/dist/ssr";
 import { getDb } from "@/lib/mongodb";
-import { ensureIndexes } from "@/lib/queries";
 import { summarizeTransactions } from "@/lib/calculations";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BorrowerList } from "@/components/borrowers/BorrowerList";
 import { BorrowerSearch } from "@/components/borrowers/BorrowerSearch";
 import { CreateBorrowerButton } from "@/components/borrowers/CreateBorrowerButton";
+import { Pagination } from "@/components/ui/Pagination";
 import type { Borrower, BorrowerWithStats, Transaction } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-
 interface PageProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }
+
+const PAGE_SIZE = 10;
 
 async function loadBorrowers(q?: string) {
   try {
@@ -61,9 +61,18 @@ function escapeRegex(s: string) {
 }
 
 export default async function BorrowersPage({ searchParams }: PageProps) {
-  await ensureIndexes();
-  const { q } = await searchParams;
+  const { q, page: pageParam } = await searchParams;
   const borrowers = await cachedLoadBorrowers(q);
+  const requestedPage = Number.parseInt(pageParam ?? "1", 10);
+  const totalPages = Math.max(1, Math.ceil(borrowers.length / PAGE_SIZE));
+  const currentPage = Math.min(
+    Math.max(Number.isNaN(requestedPage) ? 1 : requestedPage, 1),
+    totalPages
+  );
+  const visibleBorrowers = borrowers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="space-y-6">
@@ -97,7 +106,15 @@ export default async function BorrowersPage({ searchParams }: PageProps) {
           />
         )
       ) : (
-        <BorrowerList initialBorrowers={borrowers} />
+        <>
+          <BorrowerList initialBorrowers={visibleBorrowers} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pathname="/borrowers"
+            searchParams={{ q }}
+          />
+        </>
       )}
     </div>
   );

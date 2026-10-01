@@ -18,19 +18,28 @@ interface Props {
   borrowerPhone?: string;
   borrowerAddress?: string;
   transactions: Transaction[];
+  page?: number;
   summary: ReturnType<typeof summarizeTransactions>;
 }
 
-export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddress, transactions, summary }: Props) {
+const PAGE_SIZE = 10;
+
+export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddress, transactions, page = 1, summary }: Props) {
   // Calculate running balance
   const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  let runningBalance = 0;
-  const transactionsWithBalance = sortedTransactions.map(tx => {
+  const transactionsWithBalance = sortedTransactions.reduce<TransactionWithBalance[]>((result, tx) => {
     const amount = Number(tx.amount) || 0;
-    if (tx.type === "borrowed") runningBalance += amount;
-    else if (tx.type === "payment") runningBalance -= amount;
-    return { ...tx, runningBalance };
-  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const previousBalance = result.at(-1)?.runningBalance ?? 0;
+    const runningBalance = tx.type === "borrowed"
+      ? previousBalance + amount
+      : previousBalance - amount;
+    result.push({ ...tx, runningBalance });
+    return result;
+  }, []).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const visibleTransactions = transactionsWithBalance.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
 
   return (
     <div className="ledger-card overflow-hidden">
@@ -55,7 +64,7 @@ export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddres
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
-          transactions={transactionsWithBalance}
+          transactions={visibleTransactions}
           outstanding={summary.outstanding}
           deposit={summary.deposit}
         />
@@ -65,7 +74,7 @@ export function TransactionHistory({ borrowerName, borrowerPhone, borrowerAddres
           borrowerName={borrowerName}
           borrowerPhone={borrowerPhone}
           borrowerAddress={borrowerAddress}
-          transactions={transactionsWithBalance}
+          transactions={visibleTransactions}
           outstanding={summary.outstanding}
           deposit={summary.deposit}
         />

@@ -1,20 +1,17 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { ArrowRight, Users } from "@phosphor-icons/react/dist/ssr";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { InstallButton } from "@/components/ui/InstallButton";
-import { ensureIndexes } from "@/lib/queries";
 import { getDb } from "@/lib/mongodb";
 import { summarizeTransactions } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
 import type { Borrower, BorrowerWithStats } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-
 async function loadDashboardData() {
   try {
-    await ensureIndexes();
     const db = await getDb();
     const [borrowers, allTxs] = await Promise.all([
       db.collection<Borrower>("borrowers").find({}).toArray(),
@@ -75,8 +72,14 @@ async function loadDashboardData() {
   }
 }
 
+const cachedLoadDashboardData = unstable_cache(
+  loadDashboardData,
+  ["dashboard"],
+  { tags: ["borrowers", "transactions"] }
+);
+
 export default async function DashboardPage() {
-  const data = await loadDashboardData();
+  const data = await cachedLoadDashboardData();
 
   return (
     <div className="space-y-8">

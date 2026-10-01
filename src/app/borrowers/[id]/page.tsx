@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Phone, Note } from "@phosphor-icons/react/dist/ssr";
 import { findBorrowerById, findTransactionsByBorrower } from "@/lib/queries";
@@ -8,25 +9,35 @@ import { TransactionActionButtons } from "@/components/transactions/TransactionA
 import { TransactionHistory } from "@/components/transactions/TransactionHistory";
 import { StatCard } from "@/components/ui/StatCard";
 import { formatBDT } from "@/lib/format";
-
-export const dynamic = "force-dynamic";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function BorrowerProfilePage({ params }: PageProps) {
+const PAGE_SIZE = 10;
+
+const cachedLoadBorrowerProfile = unstable_cache(
+  async (borrowerId: string) =>
+    Promise.all([
+      findBorrowerById(borrowerId),
+      findTransactionsByBorrower(borrowerId),
+    ]),
+  ["borrower-profile"],
+  { tags: ["borrowers", "transactions"] }
+);
+
+export default async function BorrowerProfilePage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { page: pageParam } = await searchParams;
   const idCheck = objectIdSchema.safeParse(id);
   if (!idCheck.success) notFound();
 
   let borrower;
   let transactions;
   try {
-    [borrower, transactions] = await Promise.all([
-      findBorrowerById(idCheck.data),
-      findTransactionsByBorrower(idCheck.data),
-    ]);
+    [borrower, transactions] = await cachedLoadBorrowerProfile(idCheck.data);
   } catch (err) {
     console.error("[borrower profile] load failed", err);
     throw err; // surfaced to error.tsx boundary
@@ -34,6 +45,12 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
   if (!borrower) notFound();
 
   const summary = summarizeTransactions(transactions);
+  const requestedPage = Number.parseInt(pageParam ?? "1", 10);
+  const totalPages = Math.max(1, Math.ceil(transactions.length / PAGE_SIZE));
+  const currentPage = Math.min(
+    Math.max(Number.isNaN(requestedPage) ? 1 : requestedPage, 1),
+    totalPages
+  );
 
   return (
     <div className="space-y-8">
@@ -97,7 +114,13 @@ export default async function BorrowerProfilePage({ params }: PageProps) {
         borrowerPhone={borrower.phone}
         borrowerAddress={borrower.address}
         transactions={transactions}
+        page={currentPage}
         summary={summary}
+      />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pathname={`/borrowers/${borrower._id}`}
       />
 
       <p className="text-center text-xs text-ink-soft">

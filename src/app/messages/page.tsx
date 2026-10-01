@@ -8,10 +8,15 @@ import {
 import { findAllBorrowers } from "@/lib/queries";
 import { isSmsConfigured } from "@/lib/sms";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Pagination } from "@/components/ui/Pagination";
 import { MessageComposer } from "@/components/messages/MessageComposer";
 import type { Borrower } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
+const PAGE_SIZE = 10;
+
+interface PageProps {
+  searchParams: Promise<{ page?: string }>;
+}
 
 async function loadCustomers(): Promise<Borrower[]> {
   try {
@@ -27,11 +32,22 @@ function phoneOf(borrower: Borrower): string | null {
   return phone && phone.length > 0 ? phone : null;
 }
 
-export default async function MessagesPage() {
+export default async function MessagesPage({ searchParams }: PageProps) {
+  const { page: pageParam } = await searchParams;
   const customers = await loadCustomers();
   const smsConfigured = isSmsConfigured();
   const recipients = customers.filter((b) => phoneOf(b) !== null);
   const withoutPhone = customers.length - recipients.length;
+  const requestedPage = Number.parseInt(pageParam ?? "1", 10);
+  const totalPages = Math.max(1, Math.ceil(customers.length / PAGE_SIZE));
+  const currentPage = Math.min(
+    Math.max(Number.isNaN(requestedPage) ? 1 : requestedPage, 1),
+    totalPages
+  );
+  const visibleCustomers = customers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="space-y-6">
@@ -92,7 +108,7 @@ export default async function MessagesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.map((b, index) => {
+                    {visibleCustomers.map((b, index) => {
                       const phone = phoneOf(b);
                       return (
                         <tr
@@ -100,7 +116,7 @@ export default async function MessagesPage() {
                           className="border-b border-base-300 last:border-0 hover:bg-base-200/30"
                         >
                           <td className="text-xs text-ink-soft tabular-nums">
-                            {index + 1}
+                            {(currentPage - 1) * PAGE_SIZE + index + 1}
                           </td>
                           <td>
                             <Link
@@ -129,12 +145,12 @@ export default async function MessagesPage() {
             </div>
 
             <ul className="space-y-2 md:hidden">
-              {customers.map((b, index) => {
+              {visibleCustomers.map((b, index) => {
                 const phone = phoneOf(b);
                 return (
                   <li key={b._id} className="ledger-card flex items-center gap-3 p-3.5">
                     <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary tabular-nums">
-                      {index + 1}
+                      {(currentPage - 1) * PAGE_SIZE + index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
                       <Link
@@ -159,6 +175,11 @@ export default async function MessagesPage() {
                 );
               })}
             </ul>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pathname="/messages"
+            />
           </>
         )}
       </section>

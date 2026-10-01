@@ -2,7 +2,6 @@ import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { getDb } from "@/lib/mongodb";
-import { ensureIndexes } from "@/lib/queries";
 import { formatDateTime } from "@/lib/calculations";
 import { formatBDT } from "@/lib/format";
 import { paymentMethodLabel } from "@/lib/payment-methods";
@@ -10,12 +9,13 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import type { Borrower, Transaction, TransactionWithBorrower } from "@/lib/types";
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 import { TransactionRowReceiptButton } from "@/components/transactions/TransactionRowReceiptButton";
-
-export const dynamic = "force-dynamic";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface PageProps {
-  searchParams: Promise<{ type?: string; q?: string; from?: string; to?: string }>;
+  searchParams: Promise<{ type?: string; q?: string; from?: string; to?: string; page?: string }>;
 }
+
+const PAGE_SIZE = 10;
 
 async function loadTransactions(filters: {
   type?: string;
@@ -24,7 +24,6 @@ async function loadTransactions(filters: {
   to?: string;
 }): Promise<TransactionWithBorrower[]> {
   try {
-    await ensureIndexes();
     const db = await getDb();
     const query: Record<string, unknown> = {};
     if (filters.type === "borrowed" || filters.type === "payment") {
@@ -116,6 +115,16 @@ function escapeRegex(s: string) {
 export default async function TransactionsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const txs = await cachedLoadTransactions(sp);
+  const requestedPage = Number.parseInt(sp.page ?? "1", 10);
+  const totalPages = Math.max(1, Math.ceil(txs.length / PAGE_SIZE));
+  const currentPage = Math.min(
+    Math.max(Number.isNaN(requestedPage) ? 1 : requestedPage, 1),
+    totalPages
+  );
+  const visibleTransactions = txs.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const totals = txs.reduce(
     (acc, t) => {
@@ -170,7 +179,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {txs.map((t) => (
+                  {visibleTransactions.map((t) => (
                     <tr
                       key={t._id}
                       className={`border-b border-base-300 last:border-0 ${t.type === "borrowed" ? "bg-primary/5" : "bg-success/5"
@@ -218,7 +227,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
           </div>
 
           <ul className="space-y-2 md:hidden">
-            {txs.map((t) => {
+            {visibleTransactions.map((t) => {
               const isBorrowed = t.type === "borrowed";
               return (
                 <li
@@ -260,6 +269,12 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
               );
             })}
           </ul>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pathname="/transactions"
+            searchParams={sp}
+          />
         </>
       )}
     </div>

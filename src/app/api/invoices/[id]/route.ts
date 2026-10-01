@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import type { Invoice } from "@/lib/types";
@@ -62,6 +63,8 @@ export async function PATCH(
                 { status: 404 }
             );
         }
+
+        revalidateTag("invoices", "max");
 
         const invoice = await db
             .collection<Invoice>("invoices")

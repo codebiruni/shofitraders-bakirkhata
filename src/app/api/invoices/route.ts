@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import type { Invoice } from "@/lib/types";
+
+const cachedLoadInvoices = unstable_cache(
+    async () => {
+        const db = await getDb();
+        return db.collection<Invoice>("invoices").find({}).sort({ date: -1 }).toArray();
+    },
+    ["invoices-list"],
+    { tags: ["invoices"] }
+);
 
 export async function POST(req: NextRequest) {
     try {
@@ -20,6 +30,7 @@ export async function POST(req: NextRequest) {
         };
         const db = await getDb();
         await db.collection<Invoice>("invoices").insertOne(doc);
+        revalidateTag("invoices", "max");
         return NextResponse.json({ ok: true, data: doc });
     } catch (err) {
         console.error("[POST /api/invoices]", err);
@@ -29,8 +40,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
     try {
-        const db = await getDb();
-        const invoices = await db.collection<Invoice>("invoices").find({}).sort({ date: -1 }).toArray();
+        const invoices = await cachedLoadInvoices();
         return NextResponse.json({ ok: true, data: invoices });
     } catch (err) {
         console.error("[GET /api/invoices]", err);
